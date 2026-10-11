@@ -1,0 +1,66 @@
+# ─── Python ───────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+*.whl
+
+# ─── Virtual environments ─────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ─── Data (large files) ───────────────────────────────────────────────────────
+data/raw/
+data/interim/
+data/processed/
+# Keep external labeled data and samples
+!data/external/.gitkeep
+!data/samples/.gitkeep
+
+# ─── Models ───────────────────────────────────────────────────────────────────
+models/classical/*.joblib
+models/embeddings/*.faiss
+models/embeddings/*.pkl
+models/transformers/
+
+# ─── MLflow ───────────────────────────────────────────────────────────────────
+mlruns/
+mlartifacts/
+
+# ─── Environment ──────────────────────────────────────────────────────────────
+.env
+*.env
+
+# ─── Jupyter ──────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ─── IDE / OS ─────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log
+
+# ─── Coverage ─────────────────────────────────────────────────────────────────
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ─── Type checking ────────────────────────────────────────────────────────────
+.mypy_cache/
+
+# ─── Ruff ─────────────────────────────────────────────────────────────────────
+.ruff_cache/

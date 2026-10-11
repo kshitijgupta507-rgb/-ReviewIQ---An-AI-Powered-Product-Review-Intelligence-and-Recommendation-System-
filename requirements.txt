@@ -1,0 +1,55 @@
+# ReviewIQ — core dependencies
+# Pin minor versions; patch versions float to pick up security fixes.
+
+# ─── Data handling ────────────────────────────────────────────────────────────
+pandas>=2.1,<3.0
+polars>=0.20,<1.0
+pyarrow>=14.0,<16.0
+requests>=2.31,<3.0
+tqdm>=4.66,<5.0
+
+# ─── Classical NLP ────────────────────────────────────────────────────────────
+nltk>=3.8,<4.0
+spacy>=3.7,<4.0
+gensim>=4.3,<5.0
+scikit-learn>=1.4,<2.0
+scipy>=1.12,<2.0
+networkx>=3.2,<4.0          # TextRank
+symspellpy>=6.7,<7.0        # spell correction
+emoji>=2.10,<3.0             # emoji → text
+vaderSentiment>=3.3,<4.0
+
+# ─── Modern NLP ───────────────────────────────────────────────────────────────
+sentence-transformers>=2.6,<3.0
+transformers>=4.40,<5.0
+torch>=2.2,<3.0              # CPU build is fine; CUDA picked up automatically
+datasets>=2.18,<3.0          # HuggingFace datasets (for SemEval loading)
+bertopic>=0.16,<1.0
+umap-learn>=0.5,<1.0         # BERTopic dependency
+hdbscan>=0.8,<1.0            # BERTopic dependency
+
+# ─── Vector search ────────────────────────────────────────────────────────────
+faiss-cpu>=1.8,<2.0          # swap to faiss-gpu if GPU is available
+
+# ─── API ──────────────────────────────────────────────────────────────────────
+fastapi>=0.111,<1.0
+uvicorn[standard]>=0.29,<1.0
+pydantic>=2.6,<3.0
+
+# ─── Frontend ─────────────────────────────────────────────────────────────────
+streamlit>=1.35,<2.0
+plotly>=5.20,<6.0
+altair>=5.3,<6.0
+
+# ─── Config ───────────────────────────────────────────────────────────────────
+omegaconf>=2.3,<3.0
+
+# ─── Experiment tracking ──────────────────────────────────────────────────────
+mlflow>=2.12,<3.0
+
+# ─── LLM (RAG) ────────────────────────────────────────────────────────────────
+google-generativeai>=0.5,<1.0
+
+# ─── Evaluation ───────────────────────────────────────────────────────────────
+rouge-score>=0.1,<1.0
+rank-bm25>=0.2,<1.0          # BM25 retrieval baseline

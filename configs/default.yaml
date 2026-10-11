@@ -1,0 +1,215 @@
+# ─── ReviewIQ Default Configuration ──────────────────────────────────────────
+# All hyperparameters and paths live here.
+# Override specific keys via CLI: `python -m reviewiq.x.y ++data.seed=123`
+
+# ─── Reproducibility ──────────────────────────────────────────────────────────
+seed: 42
+
+# ─── Hardware ─────────────────────────────────────────────────────────────────
+# "auto" detects CUDA at runtime; set "cpu" or "cuda" to force.
+# RTX 3050 4 GB: batch sizes tuned accordingly (DistilBERT=8, BART fp16).
+device: auto
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+paths:
+  data_dir: data/
+  raw_dir: data/raw/
+  interim_dir: data/interim/
+  processed_dir: data/processed/
+  external_dir: data/external/
+  samples_dir: data/samples/
+  models_dir: models/
+  classical_models_dir: models/classical/
+  embeddings_dir: models/embeddings/
+  transformers_dir: models/transformers/
+  logs_dir: logs/
+
+# ─── Data ─────────────────────────────────────────────────────────────────────
+data:
+  amazon_reviews_url: "https://mcauley-lab.github.io/data/amazon_reviews_2023/"
+  amazon_category: "Electronics"
+  # Filter keywords (case-insensitive)
+  laptop_include_keywords: ["laptop", "notebooks"]
+  laptop_exclude_keywords: ["accessories", "cases", "bags", "sleeves", "charger", "adapter", "mouse", "keyboard"]
+  # Sampling
+  min_reviews_per_product: 30
+  max_reviews_per_product: 300
+  # Output files
+  reviews_parquet: data/interim/laptop_reviews_raw.parquet
+  meta_parquet: data/interim/laptop_meta_raw.parquet
+  # SemEval
+  semeval_train_xml: data/external/semeval2014_laptops_train.xml
+  semeval_test_xml: data/external/semeval2014_laptops_test.xml
+
+# ─── Preprocessing ────────────────────────────────────────────────────────────
+preprocessing:
+  # Text cleaning
+  strip_html: true
+  strip_urls: true
+  strip_emails: true
+  max_review_length: 5000       # characters; longer reviews are truncated
+  min_review_length: 10         # characters; shorter reviews are dropped
+  # Language
+  language: "en"
+  # Tokenization
+  tokenizer: "nltk_word"
+  sent_tokenizer: "nltk_sent"
+  # Stopwords
+  use_nltk_stopwords: true
+  custom_stopword_file: configs/custom_stopwords.txt
+  # Lemmatization
+  use_pos_tagging: true         # POS-aware lemmatization
+  # Spell correction
+  spell_correction: true
+  symspell_max_edit_distance: 2
+  symspell_prefix_length: 7
+  symspell_dict_path: configs/frequency_dictionary_en_82_765.txt
+  # Negation
+  negation_window: 5            # tokens to tag after negation word
+  # Emoji
+  emoji_to_text: true
+
+# ─── Representations ──────────────────────────────────────────────────────────
+representations:
+  bow:
+    max_features: 50000
+    min_df: 5
+    max_df: 0.95
+    ngram_range: [1, 2]
+  tfidf:
+    max_features: 50000
+    min_df: 5
+    max_df: 0.95
+    ngram_range: [1, 2]
+    sublinear_tf: true
+  word2vec:
+    vector_size: 300
+    window: 5
+    min_count: 5
+    workers: 4
+    epochs: 10
+    sg: 1                       # Skip-gram (1) vs CBOW (0)
+
+# ─── Classification ───────────────────────────────────────────────────────────
+classification:
+  test_size: 0.2
+  stratify: true
+  target_column: "sentiment"    # derived from star rating: 1-2=neg, 3=neu, 4-5=pos
+  naive_bayes:
+    alpha: 1.0
+  svm:
+    C: 1.0
+    kernel: "linear"
+    max_iter: 5000
+  decision_tree:
+    max_depth: 20
+    min_samples_leaf: 5
+  distilbert:
+    model_name: "distilbert-base-uncased"
+    max_length: 256
+    batch_size: 16
+    learning_rate: 2.0e-5
+    num_epochs: 3
+    warmup_ratio: 0.1
+
+# ─── Clustering ───────────────────────────────────────────────────────────────
+clustering:
+  n_clusters_range: [5, 20]     # grid search range for hierarchical
+  hierarchical:
+    linkage: "ward"
+    metric: "euclidean"
+  dbscan:
+    eps: 0.5
+    min_samples: 5
+    metric: "cosine"
+
+# ─── Topic Modeling ───────────────────────────────────────────────────────────
+topics:
+  num_topics: 10
+  lda:
+    passes: 10
+    iterations: 400
+    alpha: "auto"
+    eta: "auto"
+  nmf:
+    max_iter: 500
+    init: "nndsvda"
+  bertopic:
+    embedding_model: "all-MiniLM-L6-v2"
+    nr_topics: "auto"
+    min_topic_size: 10
+
+# ─── Retrieval ────────────────────────────────────────────────────────────────
+retrieval:
+  top_k: 20                     # candidates from sparse + dense before reranking
+  final_k: 5                    # reviews returned to user
+  embedding_model: "all-MiniLM-L6-v2"
+  faiss_index_type: "flat"      # "flat" or "ivf"; ivf faster for >100k vectors
+  ivf_nlist: 100
+  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  rrf_k: 60                     # RRF constant
+
+# ─── ABSA ─────────────────────────────────────────────────────────────────────
+absa:
+  aspects:
+    - battery
+    - display
+    - performance
+    - build_quality
+    - keyboard
+    - price
+    - thermal
+    - storage
+    - weight
+    - software
+    - customer_service
+    - delivery
+  sentiment_model: "distilbert-base-uncased-finetuned-sst-2-english"
+  use_vader_fallback: true
+
+# ─── Summarization ────────────────────────────────────────────────────────────
+summarization:
+  textrank:
+    num_sentences: 5
+    similarity_threshold: 0.1
+  abstractive:
+    model_name: "facebook/bart-large-cnn"
+    max_input_length: 1024
+    max_output_length: 150
+    min_output_length: 50
+    num_beams: 4
+
+# ─── Recommendation ───────────────────────────────────────────────────────────
+recommendation:
+  default_weights:
+    battery: 1.0
+    display: 1.0
+    performance: 1.0
+    build_quality: 1.0
+    keyboard: 1.0
+    price: 1.0
+    thermal: 1.0
+    storage: 1.0
+    weight: 1.0
+    software: 1.0
+    customer_service: 0.5
+    delivery: 0.5
+
+# ─── RAG ──────────────────────────────────────────────────────────────────────
+rag:
+  gemini_model: "gemini-1.5-flash"
+  retrieval_k: 8                # reviews to retrieve as context
+  temperature: 0.1
+  max_output_tokens: 512
+
+# ─── API ──────────────────────────────────────────────────────────────────────
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 1
+  reload: true
+
+# ─── MLflow ───────────────────────────────────────────────────────────────────
+mlflow:
+  tracking_uri: "mlruns/"
+  experiment_name: "reviewiq"

@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      target: runtime
+    container_name: reviewiq-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./mlruns:/app/mlruns
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - REVIEWIQ_DEVICE=cpu
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: .
+      target: runtime
+    container_name: reviewiq-frontend
+    command: streamlit run app/frontend/app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      - REVIEWIQ_API_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
